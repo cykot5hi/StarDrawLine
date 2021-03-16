@@ -4,9 +4,10 @@ using System.Collections.Generic;
 public class DrawLineFinger : MonoBehaviour
 {
     private LineRenderer line;
+    private EdgeCollider2D lineCol;
     private bool isMousePressed;
-    public List<Vector3> pointsList;
-    private Vector3 mousePos;
+    public List<Vector2> pointsList;
+    private Vector2 mousePos;
     public Material m_Material;
 
 
@@ -21,6 +22,8 @@ public class DrawLineFinger : MonoBehaviour
     {
       // Create line renderer component and set its property
         line = gameObject.AddComponent<LineRenderer>();
+        lineCol = gameObject.AddComponent<EdgeCollider2D>();
+        lineCol.offset = new Vector2(-3.7f, -2.25f);
         //m_Material = gameObject.GetComponent<Renderer>().material;
         line.material = m_Material;
         line.SetVertexCount(0);
@@ -28,14 +31,14 @@ public class DrawLineFinger : MonoBehaviour
         line.SetColors(new Color(1f, 1f, 1f, 1f), new Color(0.1f, 0.1f, 1f, 1f));
         line.useWorldSpace = true;
         isMousePressed = false;
-        pointsList = new List<Vector3>();
-        //        renderer.material.SetTextureOffset(
+        pointsList = new List<Vector2>();
+        
     }
     //    -----------------------------------    
     void Update()
     {
         // If mouse button down, remove old line and set its color to green
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) )
         {
             isMousePressed = true;
             line.SetVertexCount(0);
@@ -45,17 +48,21 @@ public class DrawLineFinger : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             isMousePressed = false;
+
         }
         // Drawing line when mouse is moving(presses)
         if (isMousePressed)
         {
             mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mousePos.z = 0;
+            //mousePos.z = 0;
             if (!pointsList.Contains(mousePos))
             {
                 pointsList.Add(mousePos);
                 line.SetVertexCount(pointsList.Count);
                 line.SetPosition(pointsList.Count - 1, (Vector3)pointsList[pointsList.Count - 1]);
+
+                lineCol.points = pointsList.ToArray();
+
                 if (isLineCollide())
                 {
                     isMousePressed = false;
@@ -64,7 +71,7 @@ public class DrawLineFinger : MonoBehaviour
             }
         }
     }
-    //    -----------------------------------    
+    //    -----------------------------------   
     //  Following method checks is currentLine(line drawn by last two points) collided with line 
     //    -----------------------------------    
     private bool isLineCollide()
