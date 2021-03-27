@@ -14,6 +14,6 @@ public class cameraFollow : MonoBehaviour
 
     void LateUpdate()
     {
-        transform.position = player.transform.position + offset;
+        gameObject.transform.position = new Vector3(0f, player.transform.position.y + offset.y, -10f);
     }
 }

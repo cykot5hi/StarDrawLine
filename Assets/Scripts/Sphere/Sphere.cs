@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Sphere : MonoBehaviour
 {
-    
+    // Временное решение. С какой стороны косается шар линии
+    public Transform[] lineCheck;
+    Vector2 vectorModifier;
 
     // Поля для проверки движения по линии
     // - - - - - - - - - - - - -
@@ -21,6 +23,9 @@ public class Sphere : MonoBehaviour
     public float speedMax = 10;
     Rigidbody2D sphereRigidbody;
     // - - - - - - - - - - - - - 
+    bool StartTimer;
+    float TimeStart;
+    float velocityY;
 
     void Start()
     {
@@ -28,6 +33,7 @@ public class Sphere : MonoBehaviour
         radiusSphere = sphereTransform.localScale.x;
         newPosition = new Vector2(sphereTransform.position.x, sphereTransform.position.y);
         sphereRigidbody = GetComponent<Rigidbody2D>();
+        vectorModifier = new Vector2(0f, 0f);
     }
 
     void Update()
@@ -41,6 +47,26 @@ public class Sphere : MonoBehaviour
         {
             accelerationSphere();
         }
+        if (!isLine && sphereRigidbody.velocity.y < -5) // Замедление ускорения если velocity.y to much
+        {
+            // sphereRigidbody.velocity = new Vector2(sphereRigidbody.velocity.x, -5f);
+            // StartTimer = true;
+
+            if (StartTimer)
+            {
+                TimeStart = Time.time;
+                StartTimer = false;
+                velocityY = sphereRigidbody.velocity.y;
+            }
+            sphereRigidbody.velocity = new Vector2(sphereRigidbody.velocity.x, velocityY + ((Time.time - TimeStart)/* * (Time.time - TimeStart)*/));
+        }
+        else
+        {
+            //sphereRigidbody.velocity = new Vector2(sphereRigidbody.velocity.x, -5f);
+            StartTimer = true;
+        }
+            
+        Debug.Log(sphereRigidbody.velocity);
     }
 
 
@@ -53,9 +79,60 @@ public class Sphere : MonoBehaviour
 
     void accelerationSphere() //Ускорение шара при движениии по линии
     {
+        touchingSide();
         if (oldPosition != newPosition)
         {
-            sphereRigidbody.AddForce(new Vector2((newPosition.x - oldPosition.x) * speed, (newPosition.y - oldPosition.y) * speed));
+            sphereRigidbody.AddForce(new Vector2((newPosition.x - oldPosition.x + (vectorModifier.x)) * speed, (newPosition.y - oldPosition.y + (vectorModifier.y)) * speed));
+        }
+    }
+    void touchingSide() //Корректировка направления вектора
+    {
+        int i;
+        float a = 0.5f;
+        for (i = 7; i >= 0; i--)
+        {
+            Collider2D[] collidersLine = Physics2D.OverlapCircleAll(lineCheck[i].position, 0.005f);
+
+            if (collidersLine.Length > 1)
+            {
+                Debug.Log(i);
+                break;
+            }
+        }
+        switch (i)
+        {
+            case 0:
+                vectorModifier.x = -a;
+                vectorModifier.y = 0f;  
+                break;
+            case 1:
+                vectorModifier.x = -a;
+                vectorModifier.y = -a;
+                break;
+            case 2:
+                vectorModifier.x = 0f;
+                vectorModifier.y = -a;
+                break;
+            case 3:
+                vectorModifier.x = a;
+                vectorModifier.y = -a;
+                break;
+            case 4:
+                vectorModifier.x = a;
+                vectorModifier.y = 0f;
+                break;
+            case 5:
+                vectorModifier.x = a;
+                vectorModifier.y = a;
+                break;
+            case 6:
+                vectorModifier.x = 0f;
+                vectorModifier.y = a;
+                break;
+            case 7:
+                vectorModifier.x = -a;
+                vectorModifier.y = a;
+                break;
         }
     }
 }

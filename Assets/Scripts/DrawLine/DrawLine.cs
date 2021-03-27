@@ -23,7 +23,7 @@ public class DrawLine : MonoBehaviour
       // Create line renderer component and set its property
         line = gameObject.AddComponent<LineRenderer>();
         lineCol = gameObject.GetComponent<EdgeCollider2D>();
-        lineCol.offset = new Vector2(-3.6f, -2.27f);
+        lineCol.offset = new Vector2(-0.04f, -8.8f); // поправка корявости colision
         lineCol.edgeRadius = 0.05f;
         //m_Material = gameObject.GetComponent<Renderer>().material;
         line.material = m_Material;
